@@ -153,7 +153,7 @@ export function createComplexityLimitRule(maxCost, options = {}) {
           if (cost > maxCost) {
             const errorMessage = options.formatErrorMessage ?
               options.formatErrorMessage(cost) :
-              'query exceeds complexity limit';
+              `query exceeds complexity limit. Cost: ${cost}`;
             context.reportError(new GraphQLError(
               errorMessage, [node],
             ));
