@@ -149,7 +149,9 @@ export function createComplexityLimitRule(maxCost, options = {}) {
         }
 
         if (node.kind === 'Document') {
-          if (visitor.getCost() > maxCost) {
+          const cost = visitor.getCost();
+          if (options.onCost) options.onCost(cost);
+          if (cost > maxCost) {
             context.reportError(new GraphQLError(
               'query exceeds complexity limit', [node],
             ));
