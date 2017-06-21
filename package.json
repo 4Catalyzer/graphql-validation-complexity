@@ -1,0 +1,51 @@
+{
+  "name": "graphql-validation-complexity",
+  "version": "0.0.0",
+  "description": "Query complexity validation for GraphQL.js",
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "rimraf lib && babel src -d lib",
+    "lint": "eslint src test",
+    "prepublish": "npm run build",
+    "tdd": "jest --watch",
+    "test": "npm run lint && npm run testonly -- --coverage",
+    "testonly": "jest --runInBand --verbose"
+  },
+  "jest": {
+    "browser": false,
+    "collectCoverageFrom": ["src/**"],
+    "testEnvironment": "node"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/4Catalyzer/graphql-validation-complexity.git"
+  },
+  "keywords": [
+    "graphql"
+  ],
+  "author": "4Catalyzer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/4Catalyzer/graphql-validation-complexity/issues"
+  },
+  "homepage": "https://github.com/4Catalyzer/graphql-validation-complexity#readme",
+  "peerDependencies": {
+    "graphql": ">=0.9.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-jest": "^20.0.3",
+    "babel-preset-env": "^1.5.2",
+    "codecov": "^2.2.0",
+    "eslint": "^3.19.0",
+    "eslint-config-4catalyzer": "^0.2.0",
+    "eslint-plugin-import": "^2.3.0",
+    "graphql": "^0.10.3",
+    "jest": "^20.0.4",
+    "rimraf": "^2.6.1"
+  }
+}
