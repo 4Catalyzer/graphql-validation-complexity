@@ -16,7 +16,9 @@
   },
   "jest": {
     "browser": false,
-    "collectCoverageFrom": ["src/**"],
+    "collectCoverageFrom": [
+      "src/**"
+    ],
     "testEnvironment": "node"
   },
   "repository": {
