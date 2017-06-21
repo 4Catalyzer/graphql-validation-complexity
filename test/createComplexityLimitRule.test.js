@@ -30,7 +30,7 @@ describe('createComplexityLimitRule', () => {
     const errors = validate(schema, ast, [createComplexityLimitRule(9)]);
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({
-      message: 'query exceeds complexity limit',
+      message: 'query exceeds complexity limit. Cost: 10',
     });
   });
 
