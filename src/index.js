@@ -150,6 +150,7 @@ export function createComplexityLimitRule(maxCost, options = {}) {
 
         if (node.kind === 'Document') {
           const cost = visitor.getCost();
+          if (options.onCost) options.onCost(cost);
           if (cost > maxCost) {
             const errorMessage = options.formatErrorMessage ?
               options.formatErrorMessage(cost) :

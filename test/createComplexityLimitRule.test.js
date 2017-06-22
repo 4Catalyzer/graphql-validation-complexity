@@ -34,6 +34,23 @@ describe('createComplexityLimitRule', () => {
     });
   });
 
+  it('should call onCost with complexity score', () => {
+    const ast = parse(`
+      query {
+        list {
+          name
+        }
+      }
+    `);
+
+    const onCost = jest.fn();
+    const errors = validate(schema, ast, [
+      createComplexityLimitRule(9, { onCost }),
+    ]);
+    expect(onCost).toBeCalledWith(10);
+    expect(errors).toHaveLength(1);
+  });
+
   it('should call formatErrorMessage with complexity score', () => {
     const ast = parse(`
       query {
