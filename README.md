@@ -20,6 +20,8 @@ const ComplexityLimitRule = createComplexityLimitRule(1000, {
   scalarCost: 1,
   objectCost: 10, // Default is 0.
   listFactor: 20, // Default is 10.
+  onCost: (cost) => console.log('total'),
+  formatErrorMessage: (cost) => 'Bad Query',
 });
 ```
 
