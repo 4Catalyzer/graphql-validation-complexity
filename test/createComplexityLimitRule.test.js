@@ -1,4 +1,4 @@
-import { parse, validate } from 'graphql';
+import { parse, validate, introspectionQuery } from 'graphql';
 
 import { createComplexityLimitRule } from '../src';
 
@@ -93,5 +93,14 @@ describe('createComplexityLimitRule', () => {
     expect(errors[0]).toMatchObject({
       message: 'custom error, cost 10',
     });
+
+  });
+
+  it('should not fail on introspection queries', () => {
+    const ast = parse(introspectionQuery);
+    const errors = validate(schema, ast, [
+      createComplexityLimitRule(9),
+    ]);
+    expect(errors).toHaveLength(0);
   });
 });
