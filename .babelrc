@@ -3,6 +3,6 @@
     ["env", { "loose": true }]
   ],
   "plugins": [
-    "babel-plugin-transform-object-rest-spread"
+    "transform-object-rest-spread"
   ]
 }
