@@ -1,6 +1,8 @@
 import {
   getVisitFn, GraphQLError, GraphQLNonNull, GraphQLList, GraphQLObjectType,
+  introspectionQuery, parse,
 } from 'graphql';
+import isEqual from 'lodash/isEqual';
 
 export class CostCalculator {
   constructor() {
@@ -144,13 +146,15 @@ export function createComplexityLimitRule(
     ...options
   } = {},
 ) {
+  const introspectionAst = parse(introspectionQuery);
+
   return function ComplexityLimit(context) {
     const visitor = new ComplexityVisitor(context, options);
 
     return {
       enter(node) {
-        // skip private fields
-        if (node.kind === 'Field' && node.name.value.startsWith('__')) {
+        // skip introspection query
+        if (node.kind === 'Document' && isEqual(node, introspectionAst)) {
           return false;
         }
         const visit = getVisitFn(visitor, node.kind, false);

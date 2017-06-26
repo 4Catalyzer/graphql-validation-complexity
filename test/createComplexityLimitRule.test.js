@@ -93,30 +93,12 @@ describe('createComplexityLimitRule', () => {
     expect(errors[0]).toMatchObject({
       message: 'custom error, cost 10',
     });
-
   });
 
   it('should not fail on introspection queries', () => {
     const ast = parse(introspectionQuery);
     const errors = validate(schema, ast, [
       createComplexityLimitRule(9),
-    ]);
-    expect(errors).toHaveLength(0);
-  });
-
-  it('should not include private fields in cost calculation', () => {
-    const ast = parse(`
-      query {
-        __typename
-        item {
-          name
-          __typename
-        }
-      }
-    `);
-
-    const errors = validate(schema, ast, [
-      createComplexityLimitRule(1),
     ]);
     expect(errors).toHaveLength(0);
   });

@@ -50,5 +50,8 @@
     "graphql": "^0.10.3",
     "jest": "^20.0.4",
     "rimraf": "^2.6.1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4"
   }
 }
