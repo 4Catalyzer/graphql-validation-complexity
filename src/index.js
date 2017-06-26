@@ -1,6 +1,5 @@
 import {
-  BREAK, getVisitFn,
-  GraphQLError, GraphQLNonNull, GraphQLList, GraphQLObjectType,
+  getVisitFn, GraphQLError, GraphQLNonNull, GraphQLList, GraphQLObjectType,
 } from 'graphql';
 
 export class CostCalculator {
@@ -152,7 +151,7 @@ export function createComplexityLimitRule(
       enter(node) {
         // skip introspection queries
         if (node.kind === 'Field' && node.name.value === '__schema') {
-          return BREAK;
+          return false;
         }
         const visit = getVisitFn(visitor, node.kind, false);
         if (visit) {
