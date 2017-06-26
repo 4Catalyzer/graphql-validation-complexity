@@ -149,8 +149,8 @@ export function createComplexityLimitRule(
 
     return {
       enter(node) {
-        // skip introspection queries
-        if (node.kind === 'Field' && node.name.value === '__schema') {
+        // skip private fields
+        if (node.kind === 'Field' && node.name.value.startsWith('__')) {
           return false;
         }
         const visit = getVisitFn(visitor, node.kind, false);

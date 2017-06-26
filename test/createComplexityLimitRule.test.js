@@ -103,4 +103,21 @@ describe('createComplexityLimitRule', () => {
     ]);
     expect(errors).toHaveLength(0);
   });
+
+  it('should not include private fields in cost calculation', () => {
+    const ast = parse(`
+      query {
+        __typename
+        item {
+          name
+          __typename
+        }
+      }
+    `);
+
+    const errors = validate(schema, ast, [
+      createComplexityLimitRule(1),
+    ]);
+    expect(errors).toHaveLength(0);
+  });
 });
