@@ -18,7 +18,7 @@ describe('createComplexityLimitRule', () => {
     expect(errors).toHaveLength(0);
   });
 
-  it('should not report error on an invalid query', () => {
+  it('should report error on an invalid query', () => {
     const ast = parse(`
       query {
         list {
@@ -30,7 +30,7 @@ describe('createComplexityLimitRule', () => {
     const errors = validate(schema, ast, [createComplexityLimitRule(9)]);
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({
-      message: 'query exceeds complexity limit. Cost: 10',
+      message: 'query exceeds complexity limit',
     });
   });
 

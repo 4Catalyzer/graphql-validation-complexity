@@ -130,7 +130,14 @@ export class ComplexityVisitor {
   }
 }
 
-export function createComplexityLimitRule(maxCost, options = {}) {
+function defaultFormatErrorMessage() {
+  return 'query exceeds complexity limit';
+}
+
+export function createComplexityLimitRule(
+  maxCost,
+  { onCost, formatErrorMessage = defaultFormatErrorMessage, ...options } = {},
+) {
   return function ComplexityLimit(context) {
     const visitor = new ComplexityVisitor(context, options);
 
@@ -150,13 +157,10 @@ export function createComplexityLimitRule(maxCost, options = {}) {
 
         if (node.kind === 'Document') {
           const cost = visitor.getCost();
-          if (options.onCost) options.onCost(cost);
+          if (onCost) onCost(cost);
           if (cost > maxCost) {
-            const errorMessage = options.formatErrorMessage ?
-              options.formatErrorMessage(cost) :
-              `query exceeds complexity limit. Cost: ${cost}`;
             context.reportError(new GraphQLError(
-              errorMessage, [node],
+              formatErrorMessage(cost), [node],
             ));
           }
         }
