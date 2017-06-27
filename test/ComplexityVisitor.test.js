@@ -1,5 +1,11 @@
-import { parse, TypeInfo, ValidationContext, visit, visitWithTypeInfo }
-  from 'graphql';
+import {
+  introspectionQuery,
+  parse,
+  TypeInfo,
+  ValidationContext,
+  visit,
+  visitWithTypeInfo,
+} from 'graphql';
 
 import { ComplexityVisitor } from '../src';
 
@@ -126,6 +132,18 @@ describe('ComplexityVisitor', () => {
 
       visit(ast, visitWithTypeInfo(typeInfo, visitor));
       expect(visitor.getCost()).toBe(54);
+    });
+  });
+
+  describe('introspection query', () => {
+    it('should calculate a reduced cost for the introspection query', () => {
+      const ast = parse(introspectionQuery);
+
+      const context = new ValidationContext(schema, ast, typeInfo);
+      const visitor = new ComplexityVisitor(context, {});
+
+      visit(ast, visitWithTypeInfo(typeInfo, visitor));
+      expect(visitor.getCost()).toBeLessThan(1000);
     });
   });
 });

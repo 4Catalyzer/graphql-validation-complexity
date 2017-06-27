@@ -36,6 +36,14 @@ const ComplexityLimitRule = createComplexityLimitRule(1000, {
 });
 ```
 
+By default, the validation rule applies a custom, lower cost factor for lists of introspection types, to prevent introspection queries from having unreasonably high costs. You can adjust this by setting `introspectionListFactor` on the configuration object.
+
+```js
+const ComplexityLimitRule = createComplexityLimitRule(1000, {
+  introspectionListFactor: 10, // Default is 2.
+});
+```
+
 [build-badge]: https://img.shields.io/travis/4Catalyzer/graphql-validation-complexity/master.svg
 [build]: https://travis-ci.org/4Catalyzer/graphql-validation-complexity
 
