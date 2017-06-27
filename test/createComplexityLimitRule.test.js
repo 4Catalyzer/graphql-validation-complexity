@@ -15,6 +15,7 @@ describe('createComplexityLimitRule', () => {
     `);
 
     const errors = validate(schema, ast, [createComplexityLimitRule(9)]);
+
     expect(errors).toHaveLength(0);
   });
 
@@ -28,6 +29,7 @@ describe('createComplexityLimitRule', () => {
     `);
 
     const errors = validate(schema, ast, [createComplexityLimitRule(9)]);
+
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({
       message: 'query exceeds complexity limit',
@@ -37,21 +39,23 @@ describe('createComplexityLimitRule', () => {
   it('should call onCost with complexity score', () => {
     const ast = parse(`
       query {
-        list {
+        item {
           name
         }
       }
     `);
 
-    const onCost = jest.fn();
+    const onCostSpy = jest.fn();
+
     const errors = validate(schema, ast, [
-      createComplexityLimitRule(9, { onCost }),
+      createComplexityLimitRule(9, { onCost: onCostSpy }),
     ]);
-    expect(onCost).toBeCalledWith(10);
-    expect(errors).toHaveLength(1);
+
+    expect(errors).toHaveLength(0);
+    expect(onCostSpy).toHaveBeenCalledWith(1);
   });
 
-  it('should call formatErrorMessage with complexity score', () => {
+  it('should call onCost with cost when there are errors', () => {
     const ast = parse(`
       query {
         list {
@@ -60,11 +64,34 @@ describe('createComplexityLimitRule', () => {
       }
     `);
 
-    const formatErrorMessage = jest.fn();
+    const onCostSpy = jest.fn();
+
     const errors = validate(schema, ast, [
-      createComplexityLimitRule(9, { formatErrorMessage }),
+      createComplexityLimitRule(9, { onCost: onCostSpy }),
     ]);
-    expect(formatErrorMessage).toBeCalledWith(10);
+
     expect(errors).toHaveLength(1);
+    expect(onCostSpy).toHaveBeenCalledWith(10);
+  });
+
+  it('should call formatErrorMessage with cost', () => {
+    const ast = parse(`
+      query {
+        list {
+          name
+        }
+      }
+    `);
+
+    const errors = validate(schema, ast, [
+      createComplexityLimitRule(9, {
+        formatErrorMessage: cost => `custom error, cost ${cost}`,
+      }),
+    ]);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({
+      message: 'custom error, cost 10',
+    });
   });
 });

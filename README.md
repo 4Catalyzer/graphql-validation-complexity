@@ -13,15 +13,26 @@ const ComplexityLimitRule = createComplexityLimitRule(1000);
 // Then use this rule with validate().
 ```
 
-You can also provide custom costs for scalars and objects, and a custom cost factor for lists. You can provide `onCost` function to always log the query cost. eg: in dev mode. Pass `formatErrorMessage` for custom error message when query cost exceeds max cost. Defaults to `query exceeds complexity limit`.
+You can provide a configuration object with custom costs for scalars and objects as `scalarCost` and `objectCost` respectively, and a custom cost factor for lists as `listFactor`.
 
 ```js
 const ComplexityLimitRule = createComplexityLimitRule(1000, {
   scalarCost: 1,
   objectCost: 10, // Default is 0.
   listFactor: 20, // Default is 10.
-  onCost: cost => console.log('total'),
-  formatErrorMessage: cost => 'Bad Query',
+});
+```
+
+The configuration object also supports an `onCost` callback for logging query costs and a `formatErrorMessage` callback for customizing error messages. `onCost` will be called for every query with its cost. `formatErrorMessage` will be called with the cost whenever a query exceeds the complexity limit, and should return a string containing the error message.
+
+```js
+const ComplexityLimitRule = createComplexityLimitRule(1000, {
+  onCost: (cost) => {
+    console.log('query cost:', cost);
+  },
+  formatErrorMessage: cost => (
+    `query with cost ${cost} exceeds complexity limit`
+  ),
 });
 ```
 
