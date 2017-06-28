@@ -1,6 +1,7 @@
 import {
   getVisitFn, GraphQLError, GraphQLNonNull, GraphQLList, GraphQLObjectType,
 } from 'graphql';
+import * as IntrospectionTypes from 'graphql/type/introspection';
 
 export class CostCalculator {
   constructor() {
@@ -46,15 +47,20 @@ export class ComplexityVisitor {
     scalarCost = 1,
     objectCost = 0,
     listFactor = 10,
+
+    // Special list factor to make schema queries not have huge costs.
+    introspectionListFactor = 2,
   }) {
     this.context = context;
 
     this.scalarCost = scalarCost;
     this.objectCost = objectCost;
     this.listFactor = listFactor;
+    this.introspectionListFactor = introspectionListFactor;
 
     this.currentFragment = null;
     this.listDepth = 0;
+    this.introspectionListDepth = 0;
 
     this.rootCalculator = new CostCalculator();
     this.fragmentCalculators = Object.create(null);
@@ -80,7 +86,12 @@ export class ComplexityVisitor {
     if (type instanceof GraphQLNonNull) {
       this.enterType(type.ofType);
     } else if (type instanceof GraphQLList) {
-      ++this.listDepth;
+      if (this.isIntrospectionList(type)) {
+        ++this.introspectionListDepth;
+      } else {
+        ++this.listDepth;
+      }
+
       this.enterType(type.ofType);
     } else {
       const fieldCost = type instanceof GraphQLObjectType ?
@@ -89,13 +100,25 @@ export class ComplexityVisitor {
     }
   }
 
+  isIntrospectionList({ ofType }) {
+    let type = ofType;
+    if (type instanceof GraphQLNonNull) {
+      type = type.ofType;
+    }
+
+    return IntrospectionTypes[type.name] === type;
+  }
+
   getCalculator() {
     return this.currentFragment === null ?
       this.rootCalculator : this.fragmentCalculators[this.currentFragment];
   }
 
   getDepthFactor() {
-    return this.listFactor ** this.listDepth;
+    return (
+      this.listFactor ** this.listDepth *
+      this.introspectionListFactor ** this.introspectionListDepth
+    );
   }
 
   leaveField() {
@@ -106,7 +129,12 @@ export class ComplexityVisitor {
     if (type instanceof GraphQLNonNull) {
       this.leaveType(type.ofType);
     } else if (type instanceof GraphQLList) {
-      --this.listDepth;
+      if (this.isIntrospectionList(type)) {
+        --this.introspectionListDepth;
+      } else {
+        --this.listDepth;
+      }
+
       this.leaveType(type.ofType);
     }
   }
