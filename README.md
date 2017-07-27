@@ -36,6 +36,18 @@ const ComplexityLimitRule = createComplexityLimitRule(1000, {
 });
 ```
 
+The configuration object also supports a `createError` callback for creating a custom `GraphQLError`. `createError` will be called with the cost and the document node whenever an error occurs. `formatErrorMessage` will be ignored when `createError` is specified.
+
+```js
+const ComplexityLimitRule = createComplexityLimitRule(1000, {
+  createError(cost, documentNode) {
+    const error = new GraphQLError('custom error', [documentNode]);
+    error.meta = { cost };
+    return error;
+  },
+});
+```
+
 By default, the validation rule applies a custom, lower cost factor for lists of introspection types, to prevent introspection queries from having unreasonably high costs. You can adjust this by setting `introspectionListFactor` on the configuration object.
 
 ```js

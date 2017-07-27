@@ -1,4 +1,4 @@
-import { parse, validate } from 'graphql';
+import { GraphQLError, parse, validate } from 'graphql';
 
 import { createComplexityLimitRule } from '../src';
 
@@ -92,6 +92,32 @@ describe('createComplexityLimitRule', () => {
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({
       message: 'custom error, cost 10',
+    });
+  });
+
+  it('should use createError to create the error', () => {
+    const ast = parse(`
+      query {
+        list {
+          name
+        }
+      }
+    `);
+
+    const errors = validate(schema, ast, [
+      createComplexityLimitRule(9, {
+        createError(cost, documentNode) {
+          const error = new GraphQLError('custom error', [documentNode]);
+          error.meta = { cost };
+          return error;
+        },
+      }),
+    ]);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({
+      message: 'custom error',
+      meta: { cost: 10 },
     });
   });
 });

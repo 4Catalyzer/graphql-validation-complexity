@@ -34,6 +34,9 @@
     "url": "https://github.com/4Catalyzer/graphql-validation-complexity/issues"
   },
   "homepage": "https://github.com/4Catalyzer/graphql-validation-complexity#readme",
+  "dependencies": {
+    "warning": "^3.0.0"
+  },
   "peerDependencies": {
     "graphql": ">=0.9.5"
   },
@@ -41,13 +44,14 @@
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-jest": "^20.0.3",
+    "babel-plugin-dev-expression": "^0.2.1",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "babel-preset-env": "^1.5.2",
+    "babel-preset-env": "^1.6.0",
     "codecov": "^2.2.0",
-    "eslint": "^3.19.0",
-    "eslint-config-4catalyzer": "^0.2.0",
-    "eslint-plugin-import": "^2.3.0",
-    "graphql": "^0.10.3",
+    "eslint": "^4.3.0",
+    "eslint-config-4catalyzer": "^0.3.0",
+    "eslint-plugin-import": "^2.7.0",
+    "graphql": "^0.10.5",
     "jest": "^20.0.4",
     "rimraf": "^2.6.1"
   }
