@@ -3,6 +3,7 @@
     ["env", { "loose": true }]
   ],
   "plugins": [
+    "dev-expression",
     "transform-object-rest-spread"
   ]
 }

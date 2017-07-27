@@ -2,6 +2,7 @@ import {
   getVisitFn, GraphQLError, GraphQLNonNull, GraphQLList, GraphQLObjectType,
 } from 'graphql';
 import * as IntrospectionTypes from 'graphql/type/introspection';
+import warning from 'warning';
 
 export class CostCalculator {
   constructor() {
@@ -158,7 +159,7 @@ export class ComplexityVisitor {
   }
 }
 
-function complexityLimitExceededErrorMessage() {
+export function complexityLimitExceededErrorMessage() {
   // By default, don't respond with the cost to avoid leaking information about
   // the cost scheme to a potentially malicious client.
   return 'query exceeds complexity limit';
@@ -166,12 +167,17 @@ function complexityLimitExceededErrorMessage() {
 
 export function createComplexityLimitRule(
   maxCost,
-  {
-    onCost,
-    formatErrorMessage = complexityLimitExceededErrorMessage,
-    ...options
-  } = {},
+  { onCost, createError, formatErrorMessage, ...options } = {},
 ) {
+  warning(
+    !(createError && formatErrorMessage),
+    'formatErrorMessage is ignored when createError is specified.',
+  );
+
+  formatErrorMessage = ( // eslint-disable-line no-param-reassign
+    formatErrorMessage || complexityLimitExceededErrorMessage
+  );
+
   return function ComplexityLimit(context) {
     const visitor = new ComplexityVisitor(context, options);
 
@@ -197,9 +203,11 @@ export function createComplexityLimitRule(
           }
 
           if (cost > maxCost) {
-            context.reportError(new GraphQLError(
-              formatErrorMessage(cost), [node],
-            ));
+            context.reportError(
+              createError ?
+                createError(cost, node) :
+                new GraphQLError(formatErrorMessage(cost), [node]),
+            );
           }
         }
       },
