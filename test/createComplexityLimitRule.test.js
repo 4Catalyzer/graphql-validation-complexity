@@ -74,7 +74,7 @@ describe('createComplexityLimitRule', () => {
     expect(onCostSpy).toHaveBeenCalledWith(10);
   });
 
-  it('should call formatErrorMessage with cost', () => {
+  it('should call formatError with error having cost', () => {
     const ast = parse(`
       query {
         list {
@@ -83,15 +83,16 @@ describe('createComplexityLimitRule', () => {
       }
     `);
 
+    const formatErrorSpy = jest.fn();
+
     const errors = validate(schema, ast, [
-      createComplexityLimitRule(9, {
-        formatErrorMessage: cost => `custom error, cost ${cost}`,
-      }),
+      createComplexityLimitRule(9, { formatError: formatErrorSpy }),
     ]);
 
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({
-      message: 'custom error, cost 10',
-    });
+    expect(formatErrorSpy).toHaveBeenCalledWith(expect.objectContaining({
+      message: expect.any(String),
+      cost: expect.any(Number),
+    }));
   });
 });

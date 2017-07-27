@@ -158,17 +158,11 @@ export class ComplexityVisitor {
   }
 }
 
-function complexityLimitExceededErrorMessage() {
-  // By default, don't respond with the cost to avoid leaking information about
-  // the cost scheme to a potentially malicious client.
-  return 'query exceeds complexity limit';
-}
-
 export function createComplexityLimitRule(
   maxCost,
   {
     onCost,
-    formatErrorMessage = complexityLimitExceededErrorMessage,
+    formatError,
     ...options
   } = {},
 ) {
@@ -197,9 +191,13 @@ export function createComplexityLimitRule(
           }
 
           if (cost > maxCost) {
-            context.reportError(new GraphQLError(
-              formatErrorMessage(cost), [node],
-            ));
+            const error = new GraphQLError(
+              'query exceeds complexity limit', [node],
+            );
+            error.cost = cost;
+            context.reportError(
+              formatError ? formatError(error) : error,
+            );
           }
         }
       },
