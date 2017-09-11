@@ -10,7 +10,18 @@ Query complexity validation for GraphQL.js.
 import { createComplexityLimitRule } from 'graphql-validation-complexity';
 
 const ComplexityLimitRule = createComplexityLimitRule(1000);
-// Then use this rule with validate().
+// Then use this rule with validate() or other validation APIs.
+```
+
+For example, with `express-graphql`, pass the complexity limit rule to `validationRules`.
+
+```js
+const graphqlMiddleware = graphqlHTTP({
+  schema,
+  validationRules: [
+    createComplexityLimitRule(1000),
+  ],
+});
 ```
 
 You can provide a configuration object with custom costs for scalars and objects as `scalarCost` and `objectCost` respectively, and a custom cost factor for lists as `listFactor`.
