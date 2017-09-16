@@ -41,18 +41,18 @@
     "graphql": ">=0.9.5"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
+    "babel-cli": "^6.26.0",
     "babel-eslint": "^7.2.3",
-    "babel-jest": "^20.0.3",
+    "babel-jest": "^21.0.2",
     "babel-plugin-dev-expression": "^0.2.1",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.0",
-    "codecov": "^2.2.0",
-    "eslint": "^4.3.0",
+    "codecov": "^2.3.0",
+    "eslint": "^4.7.0",
     "eslint-config-4catalyzer": "^0.3.0",
     "eslint-plugin-import": "^2.7.0",
-    "graphql": "^0.10.5",
-    "jest": "^20.0.4",
-    "rimraf": "^2.6.1"
+    "graphql": "^0.11.3",
+    "jest": "^21.1.0",
+    "rimraf": "^2.6.2"
   }
 }

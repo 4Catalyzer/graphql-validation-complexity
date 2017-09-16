@@ -31,7 +31,7 @@ describe('createComplexityLimitRule', () => {
     const errors = validate(schema, ast, [createComplexityLimitRule(9)]);
 
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({
+    expect({ ...errors[0] }).toMatchObject({
       message: 'query exceeds complexity limit',
     });
   });
@@ -90,7 +90,7 @@ describe('createComplexityLimitRule', () => {
     ]);
 
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({
+    expect({ ...errors[0] }).toMatchObject({
       message: 'custom error, cost 10',
     });
   });
@@ -115,7 +115,7 @@ describe('createComplexityLimitRule', () => {
     ]);
 
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({
+    expect({ ...errors[0] }).toMatchObject({
       message: 'custom error',
       meta: { cost: 10 },
     });
