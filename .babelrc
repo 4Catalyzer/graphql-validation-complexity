@@ -1,6 +1,8 @@
 {
   "presets": [
-    ["env", { "loose": true }]
+    ["env", {
+      "loose": true
+    }]
   ],
   "plugins": [
     "dev-expression",
