@@ -60,8 +60,7 @@ export class ComplexityVisitor {
     this.introspectionListFactor = introspectionListFactor;
 
     this.currentFragment = null;
-    this.listDepth = 0;
-    this.introspectionListDepth = 0;
+    this.costFactor = 1;
 
     this.rootCalculator = new CostCalculator();
     this.fragmentCalculators = Object.create(null);
@@ -80,25 +79,33 @@ export class ComplexityVisitor {
   }
 
   enterField() {
-    this.enterType(this.context.getType());
+    this.costFactor *= this.getFieldCostFactor();
+    this.getCalculator().addImmediate(this.costFactor * this.getFieldCost());
   }
 
-  enterType(type) {
-    if (type instanceof GraphQLNonNull) {
-      this.enterType(type.ofType);
-    } else if (type instanceof GraphQLList) {
-      if (this.isIntrospectionList(type)) {
-        ++this.introspectionListDepth;
-      } else {
-        ++this.listDepth;
-      }
+  leaveField() {
+    this.costFactor /= this.getFieldCostFactor();
+  }
 
-      this.enterType(type.ofType);
-    } else {
-      const fieldCost = type instanceof GraphQLObjectType ?
-        this.objectCost : this.scalarCost;
-      this.getCalculator().addImmediate(this.getDepthFactor() * fieldCost);
+  getFieldCostFactor() {
+    const fieldDef = this.context.getFieldDef();
+    if (fieldDef.getCostFactor) {
+      return fieldDef.getCostFactor();
     }
+
+    return this.getTypeCostFactor(this.context.getType());
+  }
+
+  getTypeCostFactor(type) {
+    if (type instanceof GraphQLNonNull) {
+      return this.getTypeCostFactor(type.ofType);
+    } else if (type instanceof GraphQLList) {
+      const typeListFactor = this.isIntrospectionList(type) ?
+        this.introspectionListFactor : this.listFactor;
+      return typeListFactor * this.getTypeCostFactor(type.ofType);
+    }
+
+    return 1;
   }
 
   isIntrospectionList({ ofType }) {
@@ -110,38 +117,31 @@ export class ComplexityVisitor {
     return IntrospectionTypes[type.name] === type;
   }
 
+  getFieldCost() {
+    const fieldDef = this.context.getFieldDef();
+    if (fieldDef.getCost) {
+      return fieldDef.getCost();
+    }
+
+    return this.getTypeCost(this.context.getType());
+  }
+
+  getTypeCost(type) {
+    if (type instanceof GraphQLNonNull || type instanceof GraphQLList) {
+      return this.getTypeCost(type.ofType);
+    }
+
+    return type instanceof GraphQLObjectType ?
+      this.objectCost : this.scalarCost;
+  }
+
   getCalculator() {
     return this.currentFragment === null ?
       this.rootCalculator : this.fragmentCalculators[this.currentFragment];
   }
 
-  getDepthFactor() {
-    return (
-      this.listFactor ** this.listDepth *
-      this.introspectionListFactor ** this.introspectionListDepth
-    );
-  }
-
-  leaveField() {
-    this.leaveType(this.context.getType());
-  }
-
-  leaveType(type) {
-    if (type instanceof GraphQLNonNull) {
-      this.leaveType(type.ofType);
-    } else if (type instanceof GraphQLList) {
-      if (this.isIntrospectionList(type)) {
-        --this.introspectionListDepth;
-      } else {
-        --this.listDepth;
-      }
-
-      this.leaveType(type.ofType);
-    }
-  }
-
   enterFragmentSpread(node) {
-    this.getCalculator().addFragment(this.getDepthFactor(), node.name.value);
+    this.getCalculator().addFragment(this.costFactor, node.name.value);
   }
 
   enterFragmentDefinition(node) {

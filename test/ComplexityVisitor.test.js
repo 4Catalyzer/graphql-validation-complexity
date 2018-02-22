@@ -109,7 +109,7 @@ describe('ComplexityVisitor', () => {
     });
   });
 
-  describe('custom costs', () => {
+  describe('custom visitor costs', () => {
     it('should calculate the correct cost', () => {
       const ast = parse(`
         query {
@@ -132,6 +132,27 @@ describe('ComplexityVisitor', () => {
 
       visit(ast, visitWithTypeInfo(typeInfo, visitor));
       expect(visitor.getCost()).toBe(54);
+    });
+  });
+
+  describe('custom field costs', () => {
+    it('should calculate the correct cost', () => {
+      const ast = parse(`
+        query {
+          expensiveItem {
+            name
+          }
+          expensiveList {
+            name
+          }
+        }
+      `);
+
+      const context = new ValidationContext(schema, ast, typeInfo);
+      const visitor = new ComplexityVisitor(context, {});
+
+      visit(ast, visitWithTypeInfo(typeInfo, visitor));
+      expect(visitor.getCost()).toBe(271);
     });
   });
 
