@@ -93,6 +93,11 @@ export class ComplexityVisitor {
       return fieldDef.getCostFactor();
     }
 
+    const directiveCostFactor = this.getDirectiveValue('costFactor');
+    if (directiveCostFactor != null) {
+      return directiveCostFactor;
+    }
+
     return this.getTypeCostFactor(this.context.getType());
   }
 
@@ -123,6 +128,11 @@ export class ComplexityVisitor {
       return fieldDef.getCost();
     }
 
+    const directiveCost = this.getDirectiveValue('cost');
+    if (directiveCost != null) {
+      return directiveCost;
+    }
+
     return this.getTypeCost(this.context.getType());
   }
 
@@ -133,6 +143,38 @@ export class ComplexityVisitor {
 
     return type instanceof GraphQLObjectType ?
       this.objectCost : this.scalarCost;
+  }
+
+  getDirectiveValue(directiveName) {
+    const fieldDef = this.context.getFieldDef();
+
+    const { astNode } = fieldDef;
+    if (!astNode || !astNode.directives) {
+      return null;
+    }
+
+    const directive = astNode.directives.find(({ name }) => (
+      name.value === directiveName
+    ));
+    if (!directive) {
+      return null;
+    }
+
+    const valueArgument = directive.arguments.find(argument => (
+      argument.name.value === 'value'
+    ));
+
+    if (!valueArgument) {
+      const fieldName = fieldDef.name;
+      const parentTypeName = this.context.getParentType().name;
+
+      throw new Error(
+        `No \`value\` argument defined in \`@${directiveName}\` directive ` +
+        `on \`${fieldName}\` field on \`${parentTypeName}\`.`,
+      );
+    }
+
+    return parseFloat(valueArgument.value.value);
   }
 
   getCalculator() {

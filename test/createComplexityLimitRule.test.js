@@ -3,6 +3,7 @@ import { GraphQLError, parse, validate } from 'graphql';
 import { createComplexityLimitRule } from '../src';
 
 import schema from './fixtures/schema';
+import sdlSchema from './fixtures/sdlSchema';
 
 describe('createComplexityLimitRule', () => {
   it('should not report errors on a valid query', () => {
@@ -53,6 +54,25 @@ describe('createComplexityLimitRule', () => {
 
     expect(errors).toHaveLength(0);
     expect(onCostSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('should call onCost with complexity score on an SDL schema', () => {
+    const ast = parse(`
+      query {
+        expensiveItem {
+          name
+        }
+      }
+    `);
+
+    const onCostSpy = jest.fn();
+
+    const errors = validate(sdlSchema, ast, [
+      createComplexityLimitRule(60, { onCost: onCostSpy }),
+    ]);
+
+    expect(errors).toHaveLength(0);
+    expect(onCostSpy).toHaveBeenCalledWith(51);
   });
 
   it('should call onCost with cost when there are errors', () => {
