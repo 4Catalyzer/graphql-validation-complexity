@@ -1,5 +1,9 @@
 import {
-  GraphQLList, GraphQLObjectType, GraphQLNonNull, GraphQLSchema, GraphQLString,
+  GraphQLList,
+  GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLSchema,
+  GraphQLString,
 } from 'graphql';
 
 const Item = new GraphQLObjectType({
@@ -7,7 +11,16 @@ const Item = new GraphQLObjectType({
   fields: () => ({
     name: { type: GraphQLString },
     item: { type: Item },
+    expensiveItem: {
+      type: Item,
+      getCost: () => 50,
+    },
     list: { type: new GraphQLList(Item) },
+    expensiveList: {
+      type: new GraphQLList(Item),
+      getCost: () => 10,
+      getCostFactor: () => 20,
+    },
     nonNullItem: {
       type: new GraphQLNonNull(Item),
       resolve: () => ({}),

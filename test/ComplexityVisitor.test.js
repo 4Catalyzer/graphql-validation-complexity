@@ -10,9 +10,11 @@ import {
 import { ComplexityVisitor } from '../src';
 
 import schema from './fixtures/schema';
+import sdlSchema from './fixtures/sdlSchema';
 
 describe('ComplexityVisitor', () => {
   const typeInfo = new TypeInfo(schema);
+  const sdlTypeInfo = new TypeInfo(sdlSchema);
 
   describe('simple queries', () => {
     it('should calculate the correct cost', () => {
@@ -109,7 +111,7 @@ describe('ComplexityVisitor', () => {
     });
   });
 
-  describe('custom costs', () => {
+  describe('custom visitor costs', () => {
     it('should calculate the correct cost', () => {
       const ast = parse(`
         query {
@@ -132,6 +134,63 @@ describe('ComplexityVisitor', () => {
 
       visit(ast, visitWithTypeInfo(typeInfo, visitor));
       expect(visitor.getCost()).toBe(54);
+    });
+  });
+
+  describe('custom field costs', () => {
+    it('should calculate the correct cost', () => {
+      const ast = parse(`
+        query {
+          expensiveItem {
+            name
+          }
+          expensiveList {
+            name
+          }
+        }
+      `);
+
+      const context = new ValidationContext(schema, ast, typeInfo);
+      const visitor = new ComplexityVisitor(context, {});
+
+      visit(ast, visitWithTypeInfo(typeInfo, visitor));
+      expect(visitor.getCost()).toBe(271);
+    });
+
+    it('should calculate the correct cost on an SDL schema', () => {
+      const ast = parse(`
+        query {
+          expensiveItem {
+            name
+          }
+          expensiveList {
+            name
+          }
+        }
+      `);
+
+      const context = new ValidationContext(sdlSchema, ast, sdlTypeInfo);
+      const visitor = new ComplexityVisitor(context, {});
+
+      visit(ast, visitWithTypeInfo(sdlTypeInfo, visitor));
+      expect(visitor.getCost()).toBe(271);
+    });
+
+    it('should error on missing value in cost directive', () => {
+      const ast = parse(`
+        query {
+          missingCostValue
+        }
+      `);
+
+      const context = new ValidationContext(sdlSchema, ast, sdlTypeInfo);
+      const visitor = new ComplexityVisitor(context, {});
+
+      expect(() => {
+        visit(ast, visitWithTypeInfo(sdlTypeInfo, visitor));
+      }).toThrow(
+        /`@cost` directive on `missingCostValue` field on `Query`/,
+      );
     });
   });
 

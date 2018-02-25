@@ -24,7 +24,7 @@ const graphqlMiddleware = graphqlHTTP({
 });
 ```
 
-You can provide a configuration object with custom costs for scalars and objects as `scalarCost` and `objectCost` respectively, and a custom cost factor for lists as `listFactor`.
+You can provide a configuration object with custom global costs for scalars and objects as `scalarCost` and `objectCost` respectively, and a custom cost factor for lists as `listFactor`.
 
 ```js
 const ComplexityLimitRule = createComplexityLimitRule(1000, {
@@ -32,6 +32,29 @@ const ComplexityLimitRule = createComplexityLimitRule(1000, {
   objectCost: 10, // Default is 0.
   listFactor: 20, // Default is 10.
 });
+```
+
+You can also set custom costs and cost factors on fields definitions with `getCost` and `getCostFactor` callbacks.
+
+```js
+const expensiveField = {
+  type: ExpensiveItem,
+  getCost: () => 50,
+};
+
+const expensiveList = {
+  type: new GraphQLList(MyItem),
+  getCostFactor: () => 100,
+};
+```
+
+You can also define these via field directives in the SDL.
+
+```graphql
+type CustomCostItem {
+  expensiveField: ExpensiveItem @cost(value: 50)
+  expensiveList: [MyItem] @costFactor(value: 100)
+}
 ```
 
 The configuration object also supports an `onCost` callback for logging query costs and a `formatErrorMessage` callback for customizing error messages. `onCost` will be called for every query with its cost. `formatErrorMessage` will be called with the cost whenever a query exceeds the complexity limit, and should return a string containing the error message.
