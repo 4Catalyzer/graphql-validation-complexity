@@ -188,9 +188,7 @@ describe('ComplexityVisitor', () => {
 
       expect(() => {
         visit(ast, visitWithTypeInfo(sdlTypeInfo, visitor));
-      }).toThrow(
-        /`@cost` directive on `missingCostValue` field on `Query`/,
-      );
+      }).toThrow(/`@cost` directive on `missingCostValue` field on `Query`/);
     });
   });
 
