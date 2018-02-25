@@ -1,5 +1,9 @@
 import {
-  getVisitFn, GraphQLError, GraphQLNonNull, GraphQLList, GraphQLObjectType,
+  getVisitFn,
+  GraphQLError,
+  GraphQLNonNull,
+  GraphQLList,
+  GraphQLObjectType,
 } from 'graphql';
 import * as IntrospectionTypes from 'graphql/type/introspection';
 import warning from 'warning';
@@ -33,9 +37,8 @@ export class CostCalculator {
         return;
       }
 
-      cost += costFactor * fragmentCalculator.calculateCost(
-        fragmentCalculators,
-      );
+      cost +=
+        costFactor * fragmentCalculator.calculateCost(fragmentCalculators);
     });
 
     this.cost = cost;
@@ -44,14 +47,17 @@ export class CostCalculator {
 }
 
 export class ComplexityVisitor {
-  constructor(context, {
-    scalarCost = 1,
-    objectCost = 0,
-    listFactor = 10,
+  constructor(
+    context,
+    {
+      scalarCost = 1,
+      objectCost = 0,
+      listFactor = 10,
 
-    // Special list factor to make schema queries not have huge costs.
-    introspectionListFactor = 2,
-  }) {
+      // Special list factor to make schema queries not have huge costs.
+      introspectionListFactor = 2,
+    },
+  ) {
     this.context = context;
 
     this.scalarCost = scalarCost;
@@ -105,8 +111,9 @@ export class ComplexityVisitor {
     if (type instanceof GraphQLNonNull) {
       return this.getTypeCostFactor(type.ofType);
     } else if (type instanceof GraphQLList) {
-      const typeListFactor = this.isIntrospectionList(type) ?
-        this.introspectionListFactor : this.listFactor;
+      const typeListFactor = this.isIntrospectionList(type)
+        ? this.introspectionListFactor
+        : this.listFactor;
       return typeListFactor * this.getTypeCostFactor(type.ofType);
     }
 
@@ -141,8 +148,9 @@ export class ComplexityVisitor {
       return this.getTypeCost(type.ofType);
     }
 
-    return type instanceof GraphQLObjectType ?
-      this.objectCost : this.scalarCost;
+    return type instanceof GraphQLObjectType
+      ? this.objectCost
+      : this.scalarCost;
   }
 
   getDirectiveValue(directiveName) {
@@ -153,16 +161,16 @@ export class ComplexityVisitor {
       return null;
     }
 
-    const directive = astNode.directives.find(({ name }) => (
-      name.value === directiveName
-    ));
+    const directive = astNode.directives.find(
+      ({ name }) => name.value === directiveName,
+    );
     if (!directive) {
       return null;
     }
 
-    const valueArgument = directive.arguments.find(argument => (
-      argument.name.value === 'value'
-    ));
+    const valueArgument = directive.arguments.find(
+      argument => argument.name.value === 'value',
+    );
 
     if (!valueArgument) {
       const fieldName = fieldDef.name;
@@ -170,7 +178,7 @@ export class ComplexityVisitor {
 
       throw new Error(
         `No \`value\` argument defined in \`@${directiveName}\` directive ` +
-        `on \`${fieldName}\` field on \`${parentTypeName}\`.`,
+          `on \`${fieldName}\` field on \`${parentTypeName}\`.`,
       );
     }
 
@@ -178,8 +186,9 @@ export class ComplexityVisitor {
   }
 
   getCalculator() {
-    return this.currentFragment === null ?
-      this.rootCalculator : this.fragmentCalculators[this.currentFragment];
+    return this.currentFragment === null
+      ? this.rootCalculator
+      : this.fragmentCalculators[this.currentFragment];
   }
 
   enterFragmentSpread(node) {
@@ -216,9 +225,8 @@ export function createComplexityLimitRule(
     'formatErrorMessage is ignored when createError is specified.',
   );
 
-  formatErrorMessage = ( // eslint-disable-line no-param-reassign
-    formatErrorMessage || complexityLimitExceededErrorMessage
-  );
+  formatErrorMessage = // eslint-disable-line no-param-reassign
+    formatErrorMessage || complexityLimitExceededErrorMessage;
 
   return function ComplexityLimit(context) {
     const visitor = new ComplexityVisitor(context, options);
@@ -246,9 +254,9 @@ export function createComplexityLimitRule(
 
           if (cost > maxCost) {
             context.reportError(
-              createError ?
-                createError(cost, node) :
-                new GraphQLError(formatErrorMessage(cost), [node]),
+              createError
+                ? createError(cost, node)
+                : new GraphQLError(formatErrorMessage(cost), [node]),
             );
           }
         }

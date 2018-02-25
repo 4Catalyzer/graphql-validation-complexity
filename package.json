@@ -9,10 +9,22 @@
   "scripts": {
     "build": "rimraf lib && babel src -d lib",
     "lint": "eslint src test",
+    "precommit": "lint-staged",
     "prepublish": "npm run build",
     "tdd": "jest --watch",
     "test": "npm run lint && npm run testonly -- --coverage",
     "testonly": "jest --runInBand --verbose"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "prettier": {
+    "printWidth": 79,
+    "singleQuote": true,
+    "trailingComma": "all"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -50,9 +62,14 @@
     "codecov": "^3.0.0",
     "eslint": "^4.10.0",
     "eslint-config-4catalyzer": "^0.3.3",
+    "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-prettier": "^2.6.0",
     "graphql": "^0.11.7",
+    "husky": "^0.14.3",
     "jest": "^21.2.1",
+    "lint-staged": "^7.0.0",
+    "prettier": "^1.10.2",
     "rimraf": "^2.6.2"
   }
 }
