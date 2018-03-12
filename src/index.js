@@ -155,13 +155,11 @@ export class ComplexityVisitor {
 
   getDirectiveValue(directiveName) {
     const fieldDef = this.context.getFieldDef();
-
     if (!fieldDef || !fieldDef.astNode || !fieldDef.astNode.directives) {
       return null;
     }
-    const { astNode } = fieldDef;
 
-    const directive = astNode.directives.find(
+    const directive = fieldDef.astNode.directives.find(
       ({ name }) => name.value === directiveName,
     );
     if (!directive) {
