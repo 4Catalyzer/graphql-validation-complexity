@@ -1,4 +1,4 @@
-import { GraphQLError, parse, validate } from 'graphql';
+import { GraphQLError, parse, validate, ValidationContext } from 'graphql';
 
 import { createComplexityLimitRule } from '../src';
 
@@ -53,7 +53,7 @@ describe('createComplexityLimitRule', () => {
     ]);
 
     expect(errors).toHaveLength(0);
-    expect(onCostSpy).toHaveBeenCalledWith(1);
+    expect(onCostSpy).toHaveBeenCalledWith(1, expect.any(ValidationContext));
   });
 
   it('should call onCost with complexity score on an SDL schema', () => {
@@ -72,7 +72,7 @@ describe('createComplexityLimitRule', () => {
     ]);
 
     expect(errors).toHaveLength(0);
-    expect(onCostSpy).toHaveBeenCalledWith(51);
+    expect(onCostSpy).toHaveBeenCalledWith(51, expect.any(ValidationContext));
   });
 
   it('should call onCost with cost when there are errors', () => {
@@ -91,7 +91,7 @@ describe('createComplexityLimitRule', () => {
     ]);
 
     expect(errors).toHaveLength(1);
-    expect(onCostSpy).toHaveBeenCalledWith(10);
+    expect(onCostSpy).toHaveBeenCalledWith(10, expect.any(ValidationContext));
   });
 
   it('should call formatErrorMessage with cost', () => {
