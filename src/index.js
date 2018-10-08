@@ -247,7 +247,7 @@ export function createComplexityLimitRule(
           const cost = visitor.getCost();
 
           if (onCost) {
-            onCost(cost);
+            onCost(cost, context);
           }
 
           if (cost > maxCost) {
