@@ -1,6 +1,9 @@
 import { buildSchema } from 'graphql';
 
-export default buildSchema(`
+export default buildSchema(/* GraphQL */ `
+  directive @cost(value: Int) on FIELD_DEFINITION
+  directive @costFactor(value: Int) on FIELD_DEFINITION
+
   type Query {
     name: String
 
