@@ -110,7 +110,9 @@ export class ComplexityVisitor {
   getTypeCostFactor(type) {
     if (type instanceof GraphQLNonNull) {
       return this.getTypeCostFactor(type.ofType);
-    } else if (type instanceof GraphQLList) {
+    }
+
+    if (type instanceof GraphQLList) {
       const typeListFactor = this.isIntrospectionList(type)
         ? this.introspectionListFactor
         : this.listFactor;

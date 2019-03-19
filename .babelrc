@@ -1,11 +1,13 @@
 {
   "presets": [
-    ["env", {
+    ["@babel/env", {
       "loose": true
     }]
   ],
   "plugins": [
     "dev-expression",
-    "transform-object-rest-spread"
+    ["@babel/proposal-object-rest-spread", {
+      "loose": true
+    }]
   ]
 }

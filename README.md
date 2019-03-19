@@ -51,6 +51,9 @@ const expensiveList = {
 You can also define these via field directives in the SDL.
 
 ```graphql
+directive @cost(value: Int) on FIELD_DEFINITION
+directive @costFactor(value: Int) on FIELD_DEFINITION
+
 type CustomCostItem {
   expensiveField: ExpensiveItem @cost(value: 50)
   expensiveList: [MyItem] @costFactor(value: 100)
