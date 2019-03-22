@@ -58,12 +58,10 @@
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.5.0",
     "babel-plugin-dev-expression": "^0.2.1",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "codecov": "^3.2.0",
     "eslint": "^5.15.3",
     "eslint-config-4catalyzer": "^0.8.0",

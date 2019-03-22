@@ -5,9 +5,6 @@
     }]
   ],
   "plugins": [
-    "dev-expression",
-    ["@babel/proposal-object-rest-spread", {
-      "loose": true
-    }]
+    "dev-expression"
   ]
 }
