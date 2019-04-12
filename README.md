@@ -13,10 +13,17 @@ const ComplexityLimitRule = createComplexityLimitRule(1000);
 // Then use this rule with validate() or other validation APIs.
 ```
 
-For example, with `express-graphql`, pass the complexity limit rule to `validationRules`.
+For example, with `express-graphql` or Apollo Server, pass the complexity limit rule to `validationRules`.
 
 ```js
 const graphqlMiddleware = graphqlHTTP({
+  schema,
+  validationRules: [
+    createComplexityLimitRule(1000),
+  ],
+});
+
+const apolloServer = new ApolloServer({
   schema,
   validationRules: [
     createComplexityLimitRule(1000),
