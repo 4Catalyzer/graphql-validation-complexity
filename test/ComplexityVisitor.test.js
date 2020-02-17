@@ -1,14 +1,13 @@
 import {
-  introspectionQuery,
-  parse,
   TypeInfo,
   ValidationContext,
+  introspectionQuery,
+  parse,
   visit,
   visitWithTypeInfo,
 } from 'graphql';
 
 import { ComplexityVisitor } from '../src';
-
 import schema from './fixtures/schema';
 import sdlSchema from './fixtures/sdlSchema';
 
