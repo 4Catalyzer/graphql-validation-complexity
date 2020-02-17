@@ -1,4 +1,4 @@
-import { getVisitFn, GraphQLError } from 'graphql';
+import { GraphQLError, getVisitFn } from 'graphql';
 import warning from 'warning';
 
 import ComplexityVisitor from './ComplexityVisitor';

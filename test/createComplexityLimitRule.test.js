@@ -1,7 +1,6 @@
-import { GraphQLError, parse, validate, ValidationContext } from 'graphql';
+import { GraphQLError, ValidationContext, parse, validate } from 'graphql';
 
 import { createComplexityLimitRule } from '../src';
-
 import schema from './fixtures/schema';
 import sdlSchema from './fixtures/sdlSchema';
 
