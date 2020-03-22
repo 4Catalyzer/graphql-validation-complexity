@@ -104,7 +104,7 @@ describe('createComplexityLimitRule', () => {
 
     const errors = validate(schema, ast, [
       createComplexityLimitRule(9, {
-        formatErrorMessage: cost => `custom error, cost ${cost}`,
+        formatErrorMessage: (cost) => `custom error, cost ${cost}`,
       }),
     ]);
 
