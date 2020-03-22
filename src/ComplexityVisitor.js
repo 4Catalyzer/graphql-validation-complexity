@@ -126,7 +126,7 @@ export default class ComplexityVisitor {
     }
 
     const valueArgument = directive.arguments.find(
-      argument => argument.name.value === 'value',
+      (argument) => argument.name.value === 'value',
     );
 
     if (!valueArgument) {
