@@ -1,7 +1,7 @@
 import {
   TypeInfo,
   ValidationContext,
-  introspectionQuery,
+  getIntrospectionQuery,
   parse,
   visit,
   visitWithTypeInfo,
@@ -193,7 +193,7 @@ describe('ComplexityVisitor', () => {
 
   describe('introspection query', () => {
     it('should calculate a reduced cost for the introspection query', () => {
-      const ast = parse(introspectionQuery);
+      const ast = parse(getIntrospectionQuery());
 
       const context = new ValidationContext(schema, ast, typeInfo);
       const visitor = new ComplexityVisitor(context, {});

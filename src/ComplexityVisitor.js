@@ -52,8 +52,8 @@ export default class ComplexityVisitor {
 
   getFieldCostFactor() {
     const fieldDef = this.context.getFieldDef();
-    if (fieldDef && fieldDef.getCostFactor) {
-      return fieldDef.getCostFactor();
+    if (fieldDef?.extensions?.getCostFactor) {
+      return fieldDef.extensions.getCostFactor();
     }
 
     const directiveCostFactor = this.getDirectiveValue('costFactor');
@@ -90,8 +90,8 @@ export default class ComplexityVisitor {
 
   getFieldCost() {
     const fieldDef = this.context.getFieldDef();
-    if (fieldDef && fieldDef.getCost) {
-      return fieldDef.getCost();
+    if (fieldDef?.extensions?.getCost) {
+      return fieldDef.extensions.getCost();
     }
 
     const directiveCost = this.getDirectiveValue('cost');
@@ -114,7 +114,7 @@ export default class ComplexityVisitor {
 
   getDirectiveValue(directiveName) {
     const fieldDef = this.context.getFieldDef();
-    if (!fieldDef || !fieldDef.astNode || !fieldDef.astNode.directives) {
+    if (!fieldDef?.astNode?.directives) {
       return null;
     }
 

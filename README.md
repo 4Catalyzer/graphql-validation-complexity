@@ -18,16 +18,12 @@ For example, with `express-graphql` or Apollo Server, pass the complexity limit 
 ```js
 const graphqlMiddleware = graphqlHTTP({
   schema,
-  validationRules: [
-    createComplexityLimitRule(1000),
-  ],
+  validationRules: [createComplexityLimitRule(1000)],
 });
 
 const apolloServer = new ApolloServer({
   schema,
-  validationRules: [
-    createComplexityLimitRule(1000),
-  ],
+  validationRules: [createComplexityLimitRule(1000)],
 });
 ```
 
@@ -41,17 +37,21 @@ const ComplexityLimitRule = createComplexityLimitRule(1000, {
 });
 ```
 
-You can also set custom costs and cost factors on fields definitions with `getCost` and `getCostFactor` callbacks.
+You can also set custom costs and cost factors as field definition extensions with the `getCost` and `getCostFactor` callbacks.
 
 ```js
 const expensiveField = {
   type: ExpensiveItem,
-  getCost: () => 50,
+  extensions: {
+    getCost: () => 50,
+  },
 };
 
 const expensiveList = {
   type: new GraphQLList(MyItem),
-  getCostFactor: () => 100,
+  extensions: {
+    getCostFactor: () => 100,
+  },
 };
 ```
 
@@ -74,9 +74,8 @@ const ComplexityLimitRule = createComplexityLimitRule(1000, {
   onCost: (cost) => {
     console.log('query cost:', cost);
   },
-  formatErrorMessage: cost => (
-    `query with cost ${cost} exceeds complexity limit`
-  ),
+  formatErrorMessage: (cost) =>
+    `query with cost ${cost} exceeds complexity limit`,
 });
 ```
 
@@ -102,9 +101,7 @@ const ComplexityLimitRule = createComplexityLimitRule(1000, {
 
 [build-badge]: https://img.shields.io/travis/4Catalyzer/graphql-validation-complexity/master.svg
 [build]: https://travis-ci.org/4Catalyzer/graphql-validation-complexity
-
 [npm-badge]: https://img.shields.io/npm/v/graphql-validation-complexity.svg
 [npm]: https://www.npmjs.org/package/graphql-validation-complexity
-
 [codecov-badge]: https://img.shields.io/codecov/c/github/4Catalyzer/graphql-validation-complexity/master.svg
 [codecov]: https://codecov.io/gh/4Catalyzer/graphql-validation-complexity
