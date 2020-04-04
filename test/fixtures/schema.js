@@ -13,20 +13,24 @@ const Item = new GraphQLObjectType({
     item: { type: Item },
     expensiveItem: {
       type: Item,
-      getCost: () => 50,
+      extensions: {
+        getCost: () => 50,
+      },
     },
-    list: { type: new GraphQLList(Item) },
+    list: { type: GraphQLList(Item) },
     expensiveList: {
-      type: new GraphQLList(Item),
-      getCost: () => 10,
-      getCostFactor: () => 20,
+      type: GraphQLList(Item),
+      extensions: {
+        getCost: () => 10,
+        getCostFactor: () => 20,
+      },
     },
     nonNullItem: {
-      type: new GraphQLNonNull(Item),
+      type: GraphQLNonNull(Item),
       resolve: () => ({}),
     },
     nonNullList: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Item))),
+      type: GraphQLNonNull(GraphQLList(GraphQLNonNull(Item))),
       resolve: () => [],
     },
   }),
