@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
-    "@babel/core": "^7.11.0",
+    "@babel/core": "^7.11.1",
     "@babel/preset-env": "^7.11.0",
     "babel-jest": "^26.2.2",
     "babel-plugin-dev-expression": "^0.2.2",
