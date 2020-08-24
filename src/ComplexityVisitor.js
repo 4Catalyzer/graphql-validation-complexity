@@ -1,7 +1,45 @@
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import { print } from 'graphql/language/printer';
 import * as IntrospectionTypes from 'graphql/type/introspection';
 
 import CostCalculator from './CostCalculator';
+
+function isSameArguments(arguments1, arguments2) {
+  if (arguments1.length !== arguments2.length) {
+    return false;
+  }
+
+  return arguments1.every((argument1) => {
+    const argument2 = arguments2.find(
+      ({ name }) => name.value === argument1.name.value,
+    );
+
+    if (!argument2) {
+      return false;
+    }
+
+    return print(argument1.value) === print(argument2.value);
+  });
+}
+
+function isSameSelection(selection1, selection2) {
+  return (
+    selection1.kind === selection2.kind &&
+    selection1.name?.value === selection2.name?.value &&
+    isSameArguments(selection1.arguments || [], selection2.arguments || [])
+  );
+}
+
+function uniqSelections(selections) {
+  const results = [];
+  for (const selection of selections) {
+    const other = results.find((s) => isSameSelection(selection, s));
+    if (!other) {
+      results.push(selection);
+    }
+  }
+  return results;
+}
 
 export default class ComplexityVisitor {
   constructor(
@@ -26,18 +64,33 @@ export default class ComplexityVisitor {
     this.costFactor = 1;
 
     this.rootCalculator = new CostCalculator();
-    this.fragmentCalculators = Object.create(null);
 
     this.Field = {
       enter: this.enterField,
       leave: this.leaveField,
     };
 
-    this.FragmentSpread = this.enterFragmentSpread;
+    this.FragmentDefinition = () => {
+      // don't visit any further we will include these at the spread location
+      return false;
+    };
 
-    this.FragmentDefinition = {
-      enter: this.enterFragmentDefinition,
-      leave: this.leaveFragmentDefinition,
+    this.SelectionSet = this.flattenFragmentSpreads;
+  }
+
+  flattenFragmentSpreads(selectionSet) {
+    return {
+      ...selectionSet,
+      selections: uniqSelections(
+        selectionSet.selections.flatMap((nn) => {
+          if (nn.kind !== 'FragmentSpread') return nn;
+          const fragment = this.context.getFragment(nn.name.value);
+
+          if (!fragment) return [];
+
+          return this.flattenFragmentSpreads(fragment.selectionSet).selections;
+        }),
+      ),
     };
   }
 
@@ -143,26 +196,10 @@ export default class ComplexityVisitor {
   }
 
   getCalculator() {
-    return this.currentFragment === null
-      ? this.rootCalculator
-      : this.fragmentCalculators[this.currentFragment];
-  }
-
-  enterFragmentSpread(node) {
-    this.getCalculator().addFragment(this.costFactor, node.name.value);
-  }
-
-  enterFragmentDefinition(node) {
-    const fragmentName = node.name.value;
-    this.fragmentCalculators[fragmentName] = new CostCalculator();
-    this.currentFragment = fragmentName;
-  }
-
-  leaveFragmentDefinition() {
-    this.currentFragment = null;
+    return this.rootCalculator;
   }
 
   getCost() {
-    return this.rootCalculator.calculateCost(this.fragmentCalculators);
+    return this.rootCalculator.calculateCost();
   }
 }

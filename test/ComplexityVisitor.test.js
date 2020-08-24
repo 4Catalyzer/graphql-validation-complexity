@@ -51,8 +51,18 @@ describe('ComplexityVisitor', () => {
   });
 
   describe('queries with fragments', () => {
+    function checkCost(query) {
+      const ast = parse(query);
+      const context = new ValidationContext(schema, ast, typeInfo);
+      const visitor = new ComplexityVisitor(context, {});
+
+      visit(ast, visitWithTypeInfo(typeInfo, visitor));
+
+      return visitor.getCost();
+    }
+
     it('should calculate the correct cost', () => {
-      const ast = parse(`
+      const cost = checkCost(`
         fragment fragment1 on Item {
           name
           item {
@@ -85,11 +95,44 @@ describe('ComplexityVisitor', () => {
         }
       `);
 
-      const context = new ValidationContext(schema, ast, typeInfo);
-      const visitor = new ComplexityVisitor(context, {});
+      expect(cost).toBe(43);
+    });
 
-      visit(ast, visitWithTypeInfo(typeInfo, visitor));
-      expect(visitor.getCost()).toBe(53);
+    it('should deduplicate same fields', () => {
+      const inlineCost = checkCost(`
+        query {
+          item {
+            name
+            item {
+              name
+            }
+          }
+        }
+      `);
+
+      const fragmentCost = checkCost(`
+        fragment fragment2 on Item {
+          name
+          other: name
+          item {
+            name
+          }
+        }
+
+        fragment fragment1 on Item {
+          name
+          ...fragment2
+        }
+
+        query {
+          item {
+            ...fragment1
+            name
+          }
+        }
+      `);
+
+      expect(fragmentCost).toBe(inlineCost);
     });
 
     it('should ignore undefined fragments', () => {

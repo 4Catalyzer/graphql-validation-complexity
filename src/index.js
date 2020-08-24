@@ -30,9 +30,11 @@ export function createComplexityLimitRule(
     return {
       enter(node) {
         const visit = getVisitFn(visitor, node.kind, false);
+
         if (visit) {
-          visit.apply(visitor, arguments); // eslint-disable-line prefer-rest-params
+          return visit.apply(visitor, arguments); // eslint-disable-line prefer-rest-params
         }
+        return undefined;
       },
 
       leave(node) {
