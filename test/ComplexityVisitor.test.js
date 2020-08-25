@@ -104,7 +104,7 @@ describe('ComplexityVisitor', () => {
           item {
             name
             item {
-              name
+              name(arg: 4)
             }
           }
         }
@@ -133,6 +133,38 @@ describe('ComplexityVisitor', () => {
       `);
 
       expect(fragmentCost).toBe(inlineCost);
+    });
+
+    it('should treat fields with args differently', () => {
+      const fragmentCost = checkCost(`
+        query {
+          item {
+            name
+            name(arg: 4)
+            name(arg: 5)
+            name(arg: 4)
+            name(other: 4)
+          }
+        }
+      `);
+
+      expect(fragmentCost).toBe(4);
+    });
+
+    it('should handle deduping selection sets', () => {
+      const fragmentCost = checkCost(`
+        query {
+          item {
+            name
+          }
+          item {
+            name
+            number
+          }
+        }
+      `);
+
+      expect(fragmentCost).toBe(2);
     });
 
     it('should ignore undefined fragments', () => {

@@ -2,9 +2,8 @@ import { GraphQLError, getVisitFn } from 'graphql';
 import warning from 'warning';
 
 import ComplexityVisitor from './ComplexityVisitor';
-import CostCalculator from './CostCalculator';
 
-export { ComplexityVisitor, CostCalculator };
+export { ComplexityVisitor };
 
 export function complexityLimitExceededErrorMessage() {
   // By default, don't respond with the cost to avoid leaking information about

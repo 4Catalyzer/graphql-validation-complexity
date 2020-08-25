@@ -1,4 +1,5 @@
 import {
+  GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
@@ -9,7 +10,13 @@ import {
 const Item = new GraphQLObjectType({
   name: 'Item',
   fields: () => ({
-    name: { type: GraphQLString },
+    name: {
+      type: GraphQLString,
+      args: {
+        arg: { type: GraphQLInt },
+      },
+    },
+    number: { type: GraphQLInt },
     item: { type: Item },
     expensiveItem: {
       type: Item,
