@@ -2,9 +2,8 @@ import { GraphQLError, getVisitFn } from 'graphql';
 import warning from 'warning';
 
 import ComplexityVisitor from './ComplexityVisitor';
-import CostCalculator from './CostCalculator';
 
-export { ComplexityVisitor, CostCalculator };
+export { ComplexityVisitor };
 
 export function complexityLimitExceededErrorMessage() {
   // By default, don't respond with the cost to avoid leaking information about
@@ -30,9 +29,11 @@ export function createComplexityLimitRule(
     return {
       enter(node) {
         const visit = getVisitFn(visitor, node.kind, false);
+
         if (visit) {
-          visit.apply(visitor, arguments); // eslint-disable-line prefer-rest-params
+          return visit.apply(visitor, arguments); // eslint-disable-line prefer-rest-params
         }
+        return undefined;
       },
 
       leave(node) {
