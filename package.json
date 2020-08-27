@@ -1,6 +1,6 @@
 {
   "name": "graphql-validation-complexity",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Query complexity validation for GraphQL.js",
   "files": [
     "lib"
