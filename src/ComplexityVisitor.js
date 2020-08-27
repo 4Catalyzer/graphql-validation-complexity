@@ -4,6 +4,7 @@ import * as IntrospectionTypes from 'graphql/type/introspection';
 
 // -- code vendored from: https://github.com/graphql/graphql-js/blob/15.x.x/src/validation/rules/OverlappingFieldsCanBeMerged.js#L636-L657
 function isSameArguments(arguments1, arguments2) {
+  if (!arguments1 || !arguments2) return false;
   if (arguments1.length !== arguments2.length) {
     return false;
   }
@@ -21,11 +22,19 @@ function isSameArguments(arguments1, arguments2) {
 }
 // ---
 
+function isSameInlineFragment(selection1, selection2) {
+  return (
+    selection1.kind === 'InlineFragment' &&
+    selection1.typeCondition.name.value === selection2.typeCondition.name.value
+  );
+}
+
 function isSameSelection(selection1, selection2) {
   return (
     selection1.kind === selection2.kind &&
     selection1.name?.value === selection2.name?.value &&
-    isSameArguments(selection1.arguments, selection2.arguments)
+    (isSameInlineFragment(selection1, selection2) ||
+      isSameArguments(selection1.arguments, selection2.arguments))
   );
 }
 
@@ -34,13 +43,22 @@ function uniqSelections(selections) {
   for (const selection of selections) {
     const other = results.find((s) => isSameSelection(selection, s));
     if (!other) {
-      results.push(selection);
+      // clone nodes with selections to avoid mutating the original AST below
+
+      results.push(selection.selectionSet ? { ...selection } : selection);
       continue;
     }
 
-    if (other.selectionSet) {
+    const { selectionSet } = other;
+    if (selectionSet) {
       // merge nested selections they will be deduped later on
-      other.selectionSet.selections.push(...selection.selectionSet.selections);
+      other.selectionSet = {
+        ...selectionSet,
+        selections: [
+          ...selectionSet.selections,
+          ...selection.selectionSet.selections,
+        ],
+      };
     }
   }
   return results;
@@ -82,18 +100,20 @@ export default class ComplexityVisitor {
   }
 
   flattenFragmentSpreads(selectionSet) {
+    const nextSelections = selectionSet.selections.flatMap((node) => {
+      if (node.kind === 'FragmentSpread') {
+        const fragment = this.context.getFragment(node.name.value);
+
+        if (!fragment) return [];
+        return this.flattenFragmentSpreads(fragment.selectionSet).selections;
+      }
+
+      return node;
+    });
+
     return {
       ...selectionSet,
-      selections: uniqSelections(
-        selectionSet.selections.flatMap((nn) => {
-          if (nn.kind !== 'FragmentSpread') return nn;
-          const fragment = this.context.getFragment(nn.name.value);
-
-          if (!fragment) return [];
-
-          return this.flattenFragmentSpreads(fragment.selectionSet).selections;
-        }),
-      ),
+      selections: uniqSelections(nextSelections),
     };
   }
 

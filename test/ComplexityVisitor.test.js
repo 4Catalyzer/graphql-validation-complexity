@@ -1,3 +1,4 @@
+import deepFreeze from 'deep-freeze';
 import {
   TypeInfo,
   ValidationContext,
@@ -15,9 +16,21 @@ describe('ComplexityVisitor', () => {
   const typeInfo = new TypeInfo(schema);
   const sdlTypeInfo = new TypeInfo(sdlSchema);
 
+  function checkCost(query) {
+    const ast = parse(query);
+    const context = new ValidationContext(schema, ast, typeInfo);
+    const visitor = new ComplexityVisitor(context, {});
+
+    deepFreeze(ast); // ensure we aren't mutating accidentally
+
+    visit(ast, visitWithTypeInfo(typeInfo, visitor));
+
+    return visitor.getCost();
+  }
+
   describe('simple queries', () => {
     it('should calculate the correct cost', () => {
-      const ast = parse(`
+      const cost = checkCost(`
         query {
           item {
             name
@@ -42,25 +55,11 @@ describe('ComplexityVisitor', () => {
         }
       `);
 
-      const context = new ValidationContext(schema, ast, typeInfo);
-      const visitor = new ComplexityVisitor(context, {});
-
-      visit(ast, visitWithTypeInfo(typeInfo, visitor));
-      expect(visitor.getCost()).toBe(123);
+      expect(cost).toBe(123);
     });
   });
 
   describe('queries with fragments', () => {
-    function checkCost(query) {
-      const ast = parse(query);
-      const context = new ValidationContext(schema, ast, typeInfo);
-      const visitor = new ComplexityVisitor(context, {});
-
-      visit(ast, visitWithTypeInfo(typeInfo, visitor));
-
-      return visitor.getCost();
-    }
-
     it('should calculate the correct cost', () => {
       const cost = checkCost(`
         fragment fragment1 on Item {
@@ -167,21 +166,51 @@ describe('ComplexityVisitor', () => {
       expect(fragmentCost).toBe(2);
     });
 
-    it('should ignore undefined fragments', () => {
-      const ast = parse(`
+    it('should merge inline fragments on the same type', () => {
+      const fragmentCost = checkCost(`
         query {
           item {
-            name
-            ...fragment1
+            ... on Item {
+              name
+            }
+            ...on Item {
+              name
+            }
           }
         }
       `);
 
-      const context = new ValidationContext(schema, ast, typeInfo);
-      const visitor = new ComplexityVisitor(context, {});
+      expect(fragmentCost).toBe(1);
+    });
 
-      visit(ast, visitWithTypeInfo(typeInfo, visitor));
-      expect(visitor.getCost()).toBe(1);
+    it('should consider inline spreads of different types seperately', () => {
+      const fragmentCost = checkCost(`
+        query {
+          item {
+            ... on Item {
+              name
+            }
+            ...on Item1 {
+              name
+            }
+          }
+        }
+      `);
+
+      expect(fragmentCost).toBe(2);
+    });
+
+    it('should ignore undefined fragments', () => {
+      expect(
+        checkCost(`
+          query {
+            item {
+              name
+              ...fragment1
+            }
+          }
+        `),
+      ).toBe(1);
     });
   });
 
@@ -206,7 +235,7 @@ describe('ComplexityVisitor', () => {
         listFactor: 3,
       });
 
-      visit(ast, visitWithTypeInfo(typeInfo, visitor));
+      visit(deepFreeze(ast), visitWithTypeInfo(typeInfo, visitor));
       expect(visitor.getCost()).toBe(54);
     });
   });
@@ -227,7 +256,7 @@ describe('ComplexityVisitor', () => {
       const context = new ValidationContext(schema, ast, typeInfo);
       const visitor = new ComplexityVisitor(context, {});
 
-      visit(ast, visitWithTypeInfo(typeInfo, visitor));
+      visit(deepFreeze(ast), visitWithTypeInfo(typeInfo, visitor));
       expect(visitor.getCost()).toBe(271);
     });
 
@@ -261,7 +290,7 @@ describe('ComplexityVisitor', () => {
       const visitor = new ComplexityVisitor(context, {});
 
       expect(() => {
-        visit(ast, visitWithTypeInfo(sdlTypeInfo, visitor));
+        visit(deepFreeze(ast), visitWithTypeInfo(sdlTypeInfo, visitor));
       }).toThrow(/`@cost` directive on `missingCostValue` field on `Query`/);
     });
   });
@@ -273,7 +302,7 @@ describe('ComplexityVisitor', () => {
       const context = new ValidationContext(schema, ast, typeInfo);
       const visitor = new ComplexityVisitor(context, {});
 
-      visit(ast, visitWithTypeInfo(typeInfo, visitor));
+      visit(deepFreeze(ast), visitWithTypeInfo(typeInfo, visitor));
       expect(visitor.getCost()).toBeLessThan(1000);
     });
   });
