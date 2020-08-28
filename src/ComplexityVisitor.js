@@ -90,7 +90,6 @@ export default class ComplexityVisitor {
       enter: this.enterField,
       leave: this.leaveField,
     };
-
     this.FragmentDefinition = () => {
       // don't visit any further we will include these at the spread location
       return false;
