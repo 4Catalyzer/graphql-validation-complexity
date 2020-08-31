@@ -1,4 +1,4 @@
-import { GraphQLError, getVisitFn } from 'graphql';
+import { GraphQLError, TypeInfo, visit, visitWithTypeInfo } from 'graphql';
 import warning from 'warning';
 
 import ComplexityVisitor from './ComplexityVisitor';
@@ -25,24 +25,15 @@ export function createComplexityLimitRule(
 
   return function ComplexityLimit(context) {
     const visitor = new ComplexityVisitor(context, options);
+    // eslint-disable-next-line no-underscore-dangle
+    const typeInfo = context._typeInfo || new TypeInfo(context.getSchema());
 
     return {
-      enter(node) {
-        const visit = getVisitFn(visitor, node.kind, false);
-
-        if (visit) {
-          return visit.apply(visitor, arguments); // eslint-disable-line prefer-rest-params
-        }
-        return undefined;
-      },
-
-      leave(node) {
-        const visit = getVisitFn(visitor, node.kind, true);
-        if (visit) {
-          visit.apply(visitor, arguments); // eslint-disable-line prefer-rest-params
-        }
-
-        if (node.kind === 'Document') {
+      Document: {
+        enter(node) {
+          visit(node, visitWithTypeInfo(typeInfo, visitor));
+        },
+        leave(node) {
           const cost = visitor.getCost();
 
           if (onCost) {
@@ -56,7 +47,7 @@ export function createComplexityLimitRule(
                 : new GraphQLError(formatErrorMessage(cost), [node]),
             );
           }
-        }
+        },
       },
     };
   };

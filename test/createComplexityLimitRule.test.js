@@ -1,6 +1,12 @@
-import { GraphQLError, ValidationContext, parse, validate } from 'graphql';
+import {
+  GraphQLError,
+  ValidationContext,
+  parse,
+  specifiedRules,
+  validate,
+} from 'graphql';
 
-import { createComplexityLimitRule } from '../src';
+import { createComplexityLimitRule } from '../src/index';
 import schema from './fixtures/schema';
 import sdlSchema from './fixtures/sdlSchema';
 
@@ -53,6 +59,44 @@ describe('createComplexityLimitRule', () => {
 
     expect(errors).toHaveLength(0);
     expect(onCostSpy).toHaveBeenCalledWith(1, expect.any(ValidationContext));
+  });
+
+  it('should not affect other rules', () => {
+    const ast = parse(`
+
+      fragment fragment1 on NamedItem {
+        name
+        ... on Item {
+          number
+        }
+        ... on Item2 {
+          extra
+        }
+      }
+
+      query {
+        item {
+          ...fragment1
+          polyItem {
+            ... on Item {
+              name
+            }
+            ... on Item2 {
+              name
+            }
+          }
+        }
+      }
+    `);
+
+    const onCostSpy = jest.fn();
+    const errors = validate(schema, ast, [
+      ...specifiedRules,
+      createComplexityLimitRule(9, { onCost: onCostSpy }),
+    ]);
+
+    expect(errors).toHaveLength(0);
+    expect(onCostSpy).toHaveBeenCalledWith(6, expect.any(ValidationContext));
   });
 
   it('should call onCost with complexity score on an SDL schema', () => {
