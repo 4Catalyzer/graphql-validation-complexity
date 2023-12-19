@@ -98,13 +98,28 @@ export default class ComplexityVisitor {
     this.SelectionSet = this.flattenFragmentSpreads;
   }
 
-  flattenFragmentSpreads(selectionSet) {
-    const nextSelections = selectionSet.selections.flatMap((node) => {
-      if (node.kind === 'FragmentSpread') {
-        const fragment = this.context.getFragment(node.name.value);
+  flattenFragmentSpreads(selectionSet, visitedFragments) {
+    
+    // Ensure that visitedFragments is a Set or initialize a new Set if not provided
+    visitedFragments = visitedFragments instanceof Set ? visitedFragments : new Set();
 
+    var nextSelections = selectionSet.selections.flatMap((node) => {
+      if (node.kind === 'FragmentSpread') {
+        var fragmentName = node.name.value;
+        
+        if (visitedFragments.has(fragmentName)) {
+          return [];
+        }
+  
+        var fragment = this.context.getFragment(fragmentName);
+  
         if (!fragment) return [];
-        return this.flattenFragmentSpreads(fragment.selectionSet).selections;
+        var fragment = this.context.getFragment(node.name.value);
+        
+        // Add the fragment to the set before the recursive call
+        visitedFragments.add(fragmentName);
+        
+        return this.flattenFragmentSpreads(fragment.selectionSet, visitedFragments).selections;
       }
 
       return node;
