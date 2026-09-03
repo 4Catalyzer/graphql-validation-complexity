@@ -55,9 +55,9 @@
     "graphql": ">=0.9.5"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.10",
+    "@babel/cli": "^8.0.4",
     "@babel/core": "^7.12.10",
-    "@babel/preset-env": "^7.12.10",
+    "@babel/preset-env": "^8.0.2",
     "babel-jest": "^26.6.3",
     "babel-plugin-dev-expression": "^0.2.2",
     "codecov": "^3.8.1",
